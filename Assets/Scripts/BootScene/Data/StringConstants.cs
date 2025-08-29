@@ -1,0 +1,57 @@
+using System.Collections;
+using System.Collections.Generic;
+
+public class StrC
+{
+    public const string SEPARATOR = ":=";
+
+    public const string FOLDER_NAME_MOD = "Mods";
+    public const string FOLDER_NAME_BLOCKS = "Blocks";
+
+    public const string mod = "Mod";
+    public const string biomes = "Biomes";
+    public const string rules = "Rules";
+    public const string voxels = "Voxels";
+    public const string liquid = "Liquid";
+    public const string name = "Name";
+    public const string data = "Data";
+    public const string main = "Main";
+
+    public const string physics = "Physics";
+    public const string collidersZone = "CollidersZone";
+
+    public const string form = "Form";
+    public const string height = "Height";
+    public const string formatPNG = ".png";
+    public const string formatTXT = ".txt";
+
+    public const string type = "Type";
+    public const string TBlock = "TBlock";
+    public const string TVoxels = "TVoxels";
+    public const string TLiquid = "TLiquid";
+
+    public const string TSurface = "TSurface";
+    public const string TUnderground = "TUnderground";
+    public const string TDwarf = "TDwarf";
+    public const string TRings = "TRings";
+
+    public const string saturation = "Saturation";
+    public const string value = "Value";
+    public const string hue = "Hue";
+    public const string rand = "Rand";
+    public const string perlin = "Perlin";
+    public const string scale = "Scale";
+    public const string octaves = "Octaves";
+    public const string frequency = "Frequency";
+    public const string x = "X";
+    public const string y = "Y";
+    public const string z = "Z";
+    public const string animation = "Animation";
+    public const string lenght = "Lenght";
+    public const string speed = "Speed";
+    public const string size = "Size";
+
+    public const string viscosity = "Viscosity";
+    public const string light = "Light";
+    public const string range = "Range";
+}
