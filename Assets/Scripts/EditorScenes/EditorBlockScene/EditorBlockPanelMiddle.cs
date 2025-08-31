@@ -38,13 +38,23 @@ namespace Game.Scene.Editor.Block
 
         private void OnClickButtonLoad() 
         {
-            if (_selectedPanel != null)
+            if (_selectedPanel == null || _selectedPanel != _panelLoader)
+            {
+                if(_selectedPanel != null)
+                    _selectedPanel.Close();
+
+                _selectedPanel = _panelLoader;
+            }
+
+            if (_selectedPanel.IsOpen)
+            {
                 _selectedPanel.Close();
-
-            _selectedPanel = _panelLoader;
-
-            _selectedPanel.Open();
-            _selectedPanel.Redraw();
+                _selectedPanel = null;
+            }
+            else 
+            {
+                _selectedPanel.Open();
+            }
         }
     }
 }

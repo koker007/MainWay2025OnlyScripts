@@ -57,6 +57,8 @@ namespace Game
         }
         private void InitializeTestingService() 
         {
+            _blockManager.Initialize();
+
             //Порядок заполнения важен
             _testingService.AddToTestingList(_resourcesService);
             _testingService.AddToTestingList(_openXRService);

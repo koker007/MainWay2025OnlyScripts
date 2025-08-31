@@ -1,4 +1,5 @@
 using Game.Data.Block;
+using Game.Data.Managers;
 using Game.Services;
 using Game.Testing;
 using Game.UI;
@@ -20,6 +21,7 @@ namespace Game.Scene.Editor.Block
         private static BlockData[] _blockVariationsLast = new BlockData[0];
         private static BlockData[][] _blocksDataBuffer = new BlockData[BUFFER_SIZE_MAX][];
         private static BlockData[][] _blocksDataBufferNext = new BlockData[BUFFER_SIZE_MAX][];
+        private static BlockData[] _lastSavedData;
 
         [Header("Panels")]
         [Required][SerializeField] EditorBlockPanelLeft _panelLeft;
@@ -36,11 +38,13 @@ namespace Game.Scene.Editor.Block
         private ICameraRig _cameraRig;
         private IInputAdapter _inputAdapter;
 
+        private BlockManager _blockManager;
         private IEnvironmentService _environmentService;
         private IInputService _inputService;
 
         private Subject<Unit> onDataMeshChange = new Subject<Unit>();
 
+        public bool IsSaved => _lastSavedData == _blocksDataBuffer[0];
         public ICameraRig CameraRig => _cameraRig;
         public EditorBlockPanelLeft PanelLeft => _panelLeft;
         public EditorBlockPanelRight PanelRight => _panelRight;
@@ -67,8 +71,9 @@ namespace Game.Scene.Editor.Block
         public string TestingSystemMessage => nameof(EditorBlocksController);
 
         [Inject]
-        private void Construct(IEnvironmentService environmentService, IInputService inputService) 
+        private void Construct(BlockManager blockManager, IEnvironmentService environmentService, IInputService inputService) 
         {
+            _blockManager = blockManager;
             _environmentService = environmentService;
             _inputService = inputService;
         }
@@ -92,6 +97,20 @@ namespace Game.Scene.Editor.Block
             UpdateCameraRig();
         }
 
+        public void SetEditBlock(BlockData[] blockData = null)
+        {
+            _blocksDataBuffer = new BlockData[BUFFER_SIZE_MAX][];
+            _blocksDataBuffer[0] = blockData;
+
+            if (_blocksDataBuffer[0] == null)
+            {
+                _blocksDataBuffer[0] = new BlockData[1];
+                _blocksDataBuffer[0][0] = new TypeBlock();
+            }
+            _lastSavedData = _blocksDataBuffer[0];
+
+            RedrawAll();
+        }
         private void Subscribe() 
         {
             _panelLeft.buttonLoad.Button.onClick.AddListener(OnClickLoad);
@@ -121,9 +140,7 @@ namespace Game.Scene.Editor.Block
             InitializeCameraRig();
             InitializeInputAdapter();
 
-            _blocksDataBuffer = new BlockData[BUFFER_SIZE_MAX][];
-            _blocksDataBuffer[0] = new BlockData[1];
-            _blocksDataBuffer[0][0] = new TypeBlock();
+            SetEditBlock();
         }
 
         private void InitializeCameraRig() 
@@ -206,23 +223,16 @@ namespace Game.Scene.Editor.Block
         {
             RedrawAll();
         }
-
         private void RedrawAll() 
         {
             _panelLeft.Redraw();
             onDataMeshChange.OnNext(Unit.Default);
         }
 
-        private void Save() 
+        public void Save() 
         {
-            string blockPath = _blocksDataBuffer[0][0].GetPathBlock();
-            if(Directory.Exists(blockPath))
-                Directory.Delete(blockPath, true);
-            
-            for (int variation = 0; variation < _blocksDataBuffer[0].Length; variation++)
-            {
-                _blocksDataBuffer[0][variation].SaveData();
-            }
+            _blockManager.Save(_blocksDataBuffer[0]);
+            _lastSavedData = _blocksDataBuffer[0];
         }
         private void AddBlockDataInBuffer(BlockData[] blockData) 
         {

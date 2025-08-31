@@ -10,7 +10,7 @@ namespace Game.Scene.Editor.Block
     {
         [Required][SerializeField] private UITextBackground _mod;
 
-        private void Initialize(string mod)
+        public void Initialize(string mod)
         {
             _mod.SetText(mod);
         }

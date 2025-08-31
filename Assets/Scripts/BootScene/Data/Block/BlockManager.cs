@@ -2,19 +2,18 @@ using Game.Data.Block;
 using Game.Testing;
 using System.Collections.Generic;
 using System.IO;
+using System.Linq.Expressions;
 using UnityEngine;
 
 namespace Game.Data.Managers {
     //Осуществляет хранение, загрузку и выдачу по запросу блоков
-    public class BlockManager : DataManager<BlockData>, ITestingSystem
+    public class BlockManager : DataManager<BlockData[]>, ITestingSystem
     {
         private const string ERROR_TEXT_BLOCKS_IS_NOT_FOUND = "Block is not found";
         private const string ERROR_TEXT_BLOCKS_CANT_TO_LOAD_BLOCK_DATA = "Not can to load block data";
 
         private const int BLOCK_COUNT_MAX = 100000;
         private const int BLOCK_GET_TRY_MAX = 100;
-        private const int ID_CHARS_MOD = 3;
-        private const int ID_CHARS_NAME = 3;
 
         private float _testCoefficientReady = 0.0f;
         private string _testingSystemMessage;
@@ -28,43 +27,26 @@ namespace Game.Data.Managers {
         public bool IsAsync => false;
         public float TestCoefficientReady => _testCoefficientReady;
         public string TestingSystemMessage => _testingSystemMessage;
+        public override void Initialize()
+        {
+            _storageData = new StorageData<BlockData[]>(BLOCK_COUNT_MAX);
+        }
 
         private int GetBlockFirstID(string ModName, string BlockName)
         {
-            //Получаем текстовое сокрашение
-            string abbreviatura = "";
-            //Первые 3 символа мода
-            for (int num = 0; num < ID_CHARS_MOD; num++)
-            {
-                //Если текущий символ больше чем имя
-                if (num >= ModName.Length)
-                    abbreviatura += "_";
-                else abbreviatura += ModName[num];
-            }
+            //Получаем текстовое сокрашение и получаем ID
+            string abbreviatura = $"{ModName}{BlockName}";
+            uint ID = 0;
 
-            //Первые 3 символа имени
-            for (int num = 0; num < ID_CHARS_NAME; num++)
-            {
-                //Если текущий символ больше чем имя
-                if (num >= BlockName.Length)
-                    abbreviatura += "_";
-                else abbreviatura += BlockName[num];
-            }
-
-            //Теперь есть Абревиатура получаем ID
-            int abbreviaturaID = 0;
             //Перебираем каждый символ
             for (int num = 0; num < abbreviatura.Length; num++)
             {
-                abbreviaturaID += abbreviatura[num] * (int)Mathf.Pow(5, num);
+                ID += abbreviatura[num] * (uint)Mathf.Pow(5, num);
             }
 
-            while (abbreviaturaID >= _storageData.Count)
-            {
-                abbreviaturaID -= _storageData.Count;
-            }
+            ID %= (uint)_storageData.Count;
 
-            return abbreviaturaID;
+            return (int)ID;
         }
         public int GetBlockID(string ModName, string BlockName, bool onlyExistData = true)
         {
@@ -74,10 +56,10 @@ namespace Game.Data.Managers {
 
             for (int num = 0; num < BLOCK_GET_TRY_MAX; num++)
             {
-                BlockData blockData = _storageData.Get(idNow, 0);
+                BlockData[] blockDataArray = _storageData.Get(idNow);
 
                 //Проверяем по id что блок есть и у него совпадает мод и имя
-                if (blockData != null && blockData.mod == ModName && blockData.name == BlockName)
+                if (blockDataArray != null && blockDataArray[0].mod == ModName && blockDataArray[0].name == BlockName)
                     return idNow;
 
                 idNow++;
@@ -90,10 +72,10 @@ namespace Game.Data.Managers {
                 idNow = idStart;
                 for (int num = 0; num < BLOCK_GET_TRY_MAX; num++, idNow++)
                 {
-                    BlockData blockData = _storageData.Get(idNow, 0);
+                    BlockData[] blockDataArray = _storageData.Get(idNow);
 
                     //Проверяем по id что блок есть и у него совпадает мод и имя
-                    if (blockData == null || blockData.mod == ModName && blockData.name == BlockName)
+                    if (blockDataArray == null || blockDataArray[0].mod == ModName && blockDataArray[0].name == BlockName)
                         return idNow;
 
                 }
@@ -101,13 +83,22 @@ namespace Game.Data.Managers {
             }
             return -1;
         }
+        public int GetBlockID(BlockData blockData, bool onlyExistData = true) 
+        {
+            return GetBlockID(blockData.mod, blockData.name, onlyExistData);
+        }
 
         public TestResult TestIt()
         {
             _testResult ??= new TestResult(nameof(BlockManager));
             _testingSystemMessage = nameof(BlockManager);
 
-            CalcCountOfAllFolders();
+            if (Time.unscaledTime - _timeLastCalcBlocksCount > 20) 
+            {
+                _timeLastCalcBlocksCount = Time.unscaledTime;
+                GetAllPath();
+            }
+
             TryLoad();
 
             return _testResult;
@@ -115,8 +106,6 @@ namespace Game.Data.Managers {
 
         public override void TryLoad()
         {
-            _storageData = new StorageData<BlockData>(BLOCK_COUNT_MAX);
-
             //Проверяем есть ли папка мод
             if (!Directory.Exists(StrC.FOLDER_NAME_MOD))
                 Directory.CreateDirectory(StrC.FOLDER_NAME_MOD);
@@ -133,12 +122,13 @@ namespace Game.Data.Managers {
                     continue;
 
                 //Получаем список блоков
+                bool isBlockAdded = false;
                 string[] pathsBlockdata = Directory.GetDirectories(pathModBlocks);
                 for (int numBlock = _lastCheckNumBlock; numBlock < pathsBlockdata.Length;)
                 {
                     _lastCheckNumBlock = numBlock;
-                    BlockData[] blockVariants = LoadDatas(pathsBlockdata[numBlock]);
-                    int id = GetBlockID(blockVariants[0].mod, blockVariants[0].name, false);
+                    BlockData[] blockVariants = Load(pathsBlockdata[numBlock]);
+                    int id = GetBlockID(blockVariants[0], false);
 
                     //Если данного блока в списке нет надо добавить
                     if (id < 0)
@@ -149,13 +139,18 @@ namespace Game.Data.Managers {
                     _storageData.Add(id, blockVariants);
 
                     numBlock++;
+                    isBlockAdded = true;
                     _lastCheckNumBlock = numBlock;
                     _blocksCountAdded++;
                     break;
                 }
 
-                numMod++;
-                _lastCheckNumMod = numMod;
+                if (!isBlockAdded)
+                {
+                    numMod++;
+                    _lastCheckNumMod = numMod;
+                    _lastCheckNumBlock = 0;
+                }
                 break;
             }
 
@@ -167,52 +162,22 @@ namespace Game.Data.Managers {
                 _testResult.AddProblem(ERROR_TEXT_BLOCKS_IS_NOT_FOUND, TypeProblem.Error);
             }
         }
-
-        public override void Save(BlockData data, uint variation)
+        public override void Save(BlockData[] data)
         {
-            
-        }
+            string blockPath = data[0].GetPathBlock();
+            if (Directory.Exists(blockPath))
+                Directory.Delete(blockPath, true);
 
-        public override BlockData Load(string path)
-        {
-            throw new System.NotImplementedException();
-        }
-
-        private void CalcCountOfAllFolders() 
-        {
-            if (Time.unscaledTime - _timeLastCalcBlocksCount < 20)
-                return;
-
-            _timeLastCalcBlocksCount = Time.unscaledTime;
-            _blocksCountInDirectory = 0;
-
-            bool isExist = Directory.Exists(StrC.FOLDER_NAME_MOD);
-            if (!isExist) 
+            for (int variation = 0; variation < data.Length; variation++) 
             {
-                Directory.CreateDirectory(StrC.FOLDER_NAME_MOD);
-            }
-
-            string[] directoriesMod = Directory.GetDirectories(StrC.FOLDER_NAME_MOD);
-
-            foreach (string directoryMod in directoriesMod)
-            {
-                string pathModBlocks = GetPathBlock(directoryMod);
-                //Проверяем что папка блоков существует
-                if (!Directory.Exists(pathModBlocks))
-                    continue;
-
-                //Получаем список блоков
-                string[] pathsBlockdata = Directory.GetDirectories(pathModBlocks);
-                _blocksCountInDirectory += pathsBlockdata.Length;
+                data[variation].SaveData();
             }
         }
 
-        private string GetPathBlock(string pathMod) => $"{pathMod}\\{StrC.FOLDER_NAME_BLOCKS}";
-
-        static public BlockData[] LoadDatas(string pathBlock)
+        public override BlockData[] Load(string path)
         {
             //Нужно узнать сколько есть вариантов в папке блока
-            string[] pathVariants = Directory.GetDirectories(pathBlock);
+            string[] pathVariants = Directory.GetDirectories(path);
 
             int maxVar = 0;
             //Создаем список блоков и вытаскиваем данные в него
@@ -244,6 +209,38 @@ namespace Game.Data.Managers {
 
             return blockDatas;
         }
+
+        //Метод станет тяжелым с количеством блоков, часто нельзя использовать
+        public List<string[]> GetAllPath() 
+        {
+            _blocksCountInDirectory = 0;
+            //Узнаем количество модов 
+            bool isExist = Directory.Exists(StrC.FOLDER_NAME_MOD);
+            if (!isExist)
+            {
+                Directory.CreateDirectory(StrC.FOLDER_NAME_MOD);
+            }
+            string[] directoriesMod = Directory.GetDirectories(StrC.FOLDER_NAME_MOD);
+            List<string[]> result = new List<string[]>();
+            foreach (string directoryMod in directoriesMod)
+            {
+                string pathModBlocks = GetPathBlock(directoryMod);
+                //Проверяем что папка блоков существует
+                if (!Directory.Exists(pathModBlocks))
+                    continue;
+
+                //Получаем список блоков
+                string[] pathsBlockData = Directory.GetDirectories(pathModBlocks);
+                _blocksCountInDirectory += pathsBlockData.Length;
+
+                //Добавляем только те где есть блоки
+                result.Add(pathsBlockData);
+            }
+
+            return result;
+        }
+
+        private string GetPathBlock(string pathMod) => $"{pathMod}\\{StrC.FOLDER_NAME_BLOCKS}";
 
         static public BlockData LoadData(string pathBlockVariant)
         {
@@ -388,5 +385,6 @@ namespace Game.Data.Managers {
                 resultData.physics.loadColliderZone(pathPhysics);
             }
         }
+
     }
 }

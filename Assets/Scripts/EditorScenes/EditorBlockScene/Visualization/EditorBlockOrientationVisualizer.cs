@@ -26,9 +26,6 @@ namespace Game.Scene.Editor.Block
             float angleY = _editorBlocksController.CameraRig.MainCamera.transform.eulerAngles.y;
 
             int countRot = (int)(angleY / RIGHT_ANGLE);
-
-            Debug.Log(countRot);
-
             //face
             if (countRot == 0)
             {

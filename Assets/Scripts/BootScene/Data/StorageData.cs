@@ -4,7 +4,9 @@ namespace Game.Data
 {
     public class StorageData<T>
     {
-        private readonly T[][] _dataset;
+        private const int COUNT_NULL_SEARCH_DEPTH = 100;
+
+        private readonly T[] _dataset;
         private readonly int _count;
 
         public int Count => _count;
@@ -15,9 +17,9 @@ namespace Game.Data
                 count = 0;
 
             _count = count;
-            _dataset = new T[_count][];
+            _dataset = new T[_count];
         }
-        public bool Add(int ID, T[] dataVariations)
+        public bool Add(int ID, T dataVariations, bool isReplace = false)
         {
             bool isComplete = false;
 
@@ -26,31 +28,34 @@ namespace Game.Data
                 return false;
             }
 
-            _dataset[ID] = dataVariations;
+            if (isReplace)
+            {
+                _dataset[ID] = dataVariations;
+                isComplete = true;
+            }
+            else
+            {
+                for (int i = 0; i < COUNT_NULL_SEARCH_DEPTH; i++)
+                {
+                    int idNow = ID + i;
+                    if (_dataset[idNow] != null)
+                        continue;
 
-            isComplete = true;
+                    _dataset[idNow] = dataVariations;
+                    isComplete = true;
+                    break;
+                }
+            }
             return isComplete;
         }
-        public T[] Get(int ID)
+        public T Get(int ID)
         {
-            int IDNow = ID;
-            if (ID >= _dataset.Length)
-            {
-                IDNow -= _dataset.Length;
-            }
+            int IDNow = ID % _dataset.Length;
+            //if (ID >= _dataset.Length)
+            //{
+            //    IDNow -= _dataset.Length;
+            //}
             return _dataset[ID];
-        }
-        public T Get(int ID, int variation) 
-        {
-            T[] data = Get(ID);
-
-            if (data == null)
-                return default;
-
-            if (data.Length >= variation)
-                return default;
-
-            return data[variation];
         }
     }
 }

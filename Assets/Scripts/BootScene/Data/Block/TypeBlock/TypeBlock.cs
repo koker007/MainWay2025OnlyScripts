@@ -41,6 +41,7 @@ namespace Game.Data.Block
             if (typeBlock == null)
                 return;
 
+            type = Type.block;
             wallFace = typeBlock.wallFace;
             wallBack = typeBlock.wallBack;
             wallLeft = typeBlock.wallLeft;
@@ -289,6 +290,8 @@ namespace Game.Data.Block
 
         public TypeBlock()
         {
+            type = Type.block;
+
             wallFace = new Wall(Side.face);
             wallBack = new Wall(Side.back);
             wallRight = new Wall(Side.right);

@@ -12,6 +12,7 @@ namespace Game.Data.Block
         public string name;
         public string mod;
         public int variant;
+        public Type type;
 
         /// <summary>
         /// Внешний вид
