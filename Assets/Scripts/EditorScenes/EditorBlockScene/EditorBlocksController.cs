@@ -2,6 +2,7 @@ using Game.Data.Block;
 using Game.Data.Managers;
 using Game.Services;
 using Game.Testing;
+using Game.Tools.VR;
 using Game.UI;
 using NUnit.Framework;
 using Sirenix.OdinInspector;
@@ -31,6 +32,9 @@ namespace Game.Scene.Editor.Block
         [Header("Prefabs CameraRig")]
         [Required][SerializeField] CameraRigPC _prefabCameraRigPC;
         [Required][SerializeField] CameraRigVR _prefabCameraRigVR;
+
+        [Header("Canvas VR Controller")]
+        [Required][SerializeField] CanvasControllerVR _canvasControllerVR;
 
         private float _testCoefficientReady = 1.0f;
         private TestResult _testResult;
@@ -153,12 +157,12 @@ namespace Game.Scene.Editor.Block
 
                 case RuntimeMode.VR:
                     _cameraRig = Instantiate(_prefabCameraRigVR);
+                    _canvasControllerVR.ResetTransform(_cameraRig.MainCamera, Vector3.zero, _cameraRig.MainCamera.transform.parent.parent, new Quaternion());
                     break;
 
                 default:
                     throw new ArgumentOutOfRangeException();
             }
-
         }
         private void InitializeInputAdapter() 
         {

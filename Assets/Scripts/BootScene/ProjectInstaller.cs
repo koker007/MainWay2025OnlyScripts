@@ -14,11 +14,13 @@ namespace Game
 {
     public class ProjectInstaller : MonoInstaller
     {
+        [Header("Services")]
         [Required][SerializeField] private TestingService _testingService;
         [Required][SerializeField] private LoadingManager _loadingManager;
         [Required][SerializeField] private ResourcesService _resourcesService;
         [Required][SerializeField] private OpenXRService _openXRService;
         [Required][SerializeField] private InputService _inputService;
+        [Required][SerializeField] private EventSystemController _eventSystemController;
         [Required][SerializeField] private TranslateService _translateService;
         [Required][SerializeField] private SteamService _steamService;
         [Required][SerializeField] private DebugAudioService _audioService;
@@ -26,7 +28,6 @@ namespace Game
         [Required][SerializeField] private ScenesManager _scenesManager;
         [Required][SerializeField] private MenuWindowsManager _menuWindowsManager;
         [Required][SerializeField] private GPUBlockWall _gpuBlockWallService;
-
         [Required][SerializeField] private BlockManager _blockManager;
 
         private IEnvironmentService _environmentService = new EnvironmentService();
@@ -42,6 +43,7 @@ namespace Game
             BindInstance(_openXRService);
             BindInstance(_inputService);
             BindInstance(_environmentService);
+            BindInstance(_eventSystemController);
             BindInstance(_translateService);
             BindInstance(_steamService);
             BindInstance(_audioService);
@@ -64,6 +66,7 @@ namespace Game
             _testingService.AddToTestingList(_openXRService);
             _testingService.AddToTestingList(_inputService);
             _testingService.AddToTestingList(_environmentService);
+            _testingService.AddToTestingList(_eventSystemController);
             _testingService.AddToTestingList(_translateService);
             _testingService.AddToTestingList(_steamService);
             _testingService.AddToTestingList(_audioService);

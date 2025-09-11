@@ -6,6 +6,7 @@ namespace Game.Services
 {
     public interface IEnvironmentService: ITestingSystem
     {
+        public bool isInitialized { get; }
         public RuntimeMode runtimeMode { get; }
     }
 

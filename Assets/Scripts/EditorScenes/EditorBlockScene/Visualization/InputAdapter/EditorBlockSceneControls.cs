@@ -227,6 +227,65 @@ namespace Game.Scene.Editor.Block
                     ""isPartOfComposite"": false
                 }
             ]
+        },
+        {
+            ""name"": ""InputAdapterVRMenu"",
+            ""id"": ""7d327157-c803-4933-9b57-7e5cfcae9814"",
+            ""actions"": [
+                {
+                    ""name"": ""LeftHandClick"",
+                    ""type"": ""Button"",
+                    ""id"": ""398a234a-a0f9-4d41-b026-7a152b64b889"",
+                    ""expectedControlType"": """",
+                    ""processors"": """",
+                    ""interactions"": """",
+                    ""initialStateCheck"": false
+                },
+                {
+                    ""name"": ""RightHandClick"",
+                    ""type"": ""Button"",
+                    ""id"": ""c9042930-c64c-404f-8ddb-1f9e031ea0b3"",
+                    ""expectedControlType"": """",
+                    ""processors"": """",
+                    ""interactions"": """",
+                    ""initialStateCheck"": false
+                }
+            ],
+            ""bindings"": [
+                {
+                    ""name"": """",
+                    ""id"": ""c4695866-462d-4f73-a914-55fde4bf69a0"",
+                    ""path"": ""<XRController>{LeftHand}/{TriggerButton}"",
+                    ""interactions"": """",
+                    ""processors"": """",
+                    ""groups"": """",
+                    ""action"": ""LeftHandClick"",
+                    ""isComposite"": false,
+                    ""isPartOfComposite"": false
+                },
+                {
+                    ""name"": """",
+                    ""id"": ""c8938c2e-855a-4d1c-b51f-ff4fe327a279"",
+                    ""path"": ""<Mouse>/leftButton"",
+                    ""interactions"": """",
+                    ""processors"": """",
+                    ""groups"": """",
+                    ""action"": ""LeftHandClick"",
+                    ""isComposite"": false,
+                    ""isPartOfComposite"": false
+                },
+                {
+                    ""name"": """",
+                    ""id"": ""c596729e-46ab-4f77-8843-f26efec0d3b9"",
+                    ""path"": ""<XRController>{RightHand}/{TriggerButton}"",
+                    ""interactions"": """",
+                    ""processors"": """",
+                    ""groups"": """",
+                    ""action"": ""RightHandClick"",
+                    ""isComposite"": false,
+                    ""isPartOfComposite"": false
+                }
+            ]
         }
     ],
     ""controlSchemes"": []
@@ -240,12 +299,17 @@ namespace Game.Scene.Editor.Block
             m_InputAdapterVR = asset.FindActionMap("InputAdapterVR", throwIfNotFound: true);
             m_InputAdapterVR_Look = m_InputAdapterVR.FindAction("Look", throwIfNotFound: true);
             m_InputAdapterVR_Zoom = m_InputAdapterVR.FindAction("Zoom", throwIfNotFound: true);
+            // InputAdapterVRMenu
+            m_InputAdapterVRMenu = asset.FindActionMap("InputAdapterVRMenu", throwIfNotFound: true);
+            m_InputAdapterVRMenu_LeftHandClick = m_InputAdapterVRMenu.FindAction("LeftHandClick", throwIfNotFound: true);
+            m_InputAdapterVRMenu_RightHandClick = m_InputAdapterVRMenu.FindAction("RightHandClick", throwIfNotFound: true);
         }
 
         ~@EditorBlockSceneControls()
         {
             UnityEngine.Debug.Assert(!m_InputAdapterPC.enabled, "This will cause a leak and performance issues, EditorBlockSceneControls.InputAdapterPC.Disable() has not been called.");
             UnityEngine.Debug.Assert(!m_InputAdapterVR.enabled, "This will cause a leak and performance issues, EditorBlockSceneControls.InputAdapterVR.Disable() has not been called.");
+            UnityEngine.Debug.Assert(!m_InputAdapterVRMenu.enabled, "This will cause a leak and performance issues, EditorBlockSceneControls.InputAdapterVRMenu.Disable() has not been called.");
         }
 
         /// <summary>
@@ -542,6 +606,113 @@ namespace Game.Scene.Editor.Block
         /// Provides a new <see cref="InputAdapterVRActions" /> instance referencing this action map.
         /// </summary>
         public InputAdapterVRActions @InputAdapterVR => new InputAdapterVRActions(this);
+
+        // InputAdapterVRMenu
+        private readonly InputActionMap m_InputAdapterVRMenu;
+        private List<IInputAdapterVRMenuActions> m_InputAdapterVRMenuActionsCallbackInterfaces = new List<IInputAdapterVRMenuActions>();
+        private readonly InputAction m_InputAdapterVRMenu_LeftHandClick;
+        private readonly InputAction m_InputAdapterVRMenu_RightHandClick;
+        /// <summary>
+        /// Provides access to input actions defined in input action map "InputAdapterVRMenu".
+        /// </summary>
+        public struct InputAdapterVRMenuActions
+        {
+            private @EditorBlockSceneControls m_Wrapper;
+
+            /// <summary>
+            /// Construct a new instance of the input action map wrapper class.
+            /// </summary>
+            public InputAdapterVRMenuActions(@EditorBlockSceneControls wrapper) { m_Wrapper = wrapper; }
+            /// <summary>
+            /// Provides access to the underlying input action "InputAdapterVRMenu/LeftHandClick".
+            /// </summary>
+            public InputAction @LeftHandClick => m_Wrapper.m_InputAdapterVRMenu_LeftHandClick;
+            /// <summary>
+            /// Provides access to the underlying input action "InputAdapterVRMenu/RightHandClick".
+            /// </summary>
+            public InputAction @RightHandClick => m_Wrapper.m_InputAdapterVRMenu_RightHandClick;
+            /// <summary>
+            /// Provides access to the underlying input action map instance.
+            /// </summary>
+            public InputActionMap Get() { return m_Wrapper.m_InputAdapterVRMenu; }
+            /// <inheritdoc cref="UnityEngine.InputSystem.InputActionMap.Enable()" />
+            public void Enable() { Get().Enable(); }
+            /// <inheritdoc cref="UnityEngine.InputSystem.InputActionMap.Disable()" />
+            public void Disable() { Get().Disable(); }
+            /// <inheritdoc cref="UnityEngine.InputSystem.InputActionMap.enabled" />
+            public bool enabled => Get().enabled;
+            /// <summary>
+            /// Implicitly converts an <see ref="InputAdapterVRMenuActions" /> to an <see ref="InputActionMap" /> instance.
+            /// </summary>
+            public static implicit operator InputActionMap(InputAdapterVRMenuActions set) { return set.Get(); }
+            /// <summary>
+            /// Adds <see cref="InputAction.started"/>, <see cref="InputAction.performed"/> and <see cref="InputAction.canceled"/> callbacks provided via <param cref="instance" /> on all input actions contained in this map.
+            /// </summary>
+            /// <param name="instance">Callback instance.</param>
+            /// <remarks>
+            /// If <paramref name="instance" /> is <c>null</c> or <paramref name="instance"/> have already been added this method does nothing.
+            /// </remarks>
+            /// <seealso cref="InputAdapterVRMenuActions" />
+            public void AddCallbacks(IInputAdapterVRMenuActions instance)
+            {
+                if (instance == null || m_Wrapper.m_InputAdapterVRMenuActionsCallbackInterfaces.Contains(instance)) return;
+                m_Wrapper.m_InputAdapterVRMenuActionsCallbackInterfaces.Add(instance);
+                @LeftHandClick.started += instance.OnLeftHandClick;
+                @LeftHandClick.performed += instance.OnLeftHandClick;
+                @LeftHandClick.canceled += instance.OnLeftHandClick;
+                @RightHandClick.started += instance.OnRightHandClick;
+                @RightHandClick.performed += instance.OnRightHandClick;
+                @RightHandClick.canceled += instance.OnRightHandClick;
+            }
+
+            /// <summary>
+            /// Removes <see cref="InputAction.started"/>, <see cref="InputAction.performed"/> and <see cref="InputAction.canceled"/> callbacks provided via <param cref="instance" /> on all input actions contained in this map.
+            /// </summary>
+            /// <remarks>
+            /// Calling this method when <paramref name="instance" /> have not previously been registered has no side-effects.
+            /// </remarks>
+            /// <seealso cref="InputAdapterVRMenuActions" />
+            private void UnregisterCallbacks(IInputAdapterVRMenuActions instance)
+            {
+                @LeftHandClick.started -= instance.OnLeftHandClick;
+                @LeftHandClick.performed -= instance.OnLeftHandClick;
+                @LeftHandClick.canceled -= instance.OnLeftHandClick;
+                @RightHandClick.started -= instance.OnRightHandClick;
+                @RightHandClick.performed -= instance.OnRightHandClick;
+                @RightHandClick.canceled -= instance.OnRightHandClick;
+            }
+
+            /// <summary>
+            /// Unregisters <param cref="instance" /> and unregisters all input action callbacks via <see cref="InputAdapterVRMenuActions.UnregisterCallbacks(IInputAdapterVRMenuActions)" />.
+            /// </summary>
+            /// <seealso cref="InputAdapterVRMenuActions.UnregisterCallbacks(IInputAdapterVRMenuActions)" />
+            public void RemoveCallbacks(IInputAdapterVRMenuActions instance)
+            {
+                if (m_Wrapper.m_InputAdapterVRMenuActionsCallbackInterfaces.Remove(instance))
+                    UnregisterCallbacks(instance);
+            }
+
+            /// <summary>
+            /// Replaces all existing callback instances and previously registered input action callbacks associated with them with callbacks provided via <param cref="instance" />.
+            /// </summary>
+            /// <remarks>
+            /// If <paramref name="instance" /> is <c>null</c>, calling this method will only unregister all existing callbacks but not register any new callbacks.
+            /// </remarks>
+            /// <seealso cref="InputAdapterVRMenuActions.AddCallbacks(IInputAdapterVRMenuActions)" />
+            /// <seealso cref="InputAdapterVRMenuActions.RemoveCallbacks(IInputAdapterVRMenuActions)" />
+            /// <seealso cref="InputAdapterVRMenuActions.UnregisterCallbacks(IInputAdapterVRMenuActions)" />
+            public void SetCallbacks(IInputAdapterVRMenuActions instance)
+            {
+                foreach (var item in m_Wrapper.m_InputAdapterVRMenuActionsCallbackInterfaces)
+                    UnregisterCallbacks(item);
+                m_Wrapper.m_InputAdapterVRMenuActionsCallbackInterfaces.Clear();
+                AddCallbacks(instance);
+            }
+        }
+        /// <summary>
+        /// Provides a new <see cref="InputAdapterVRMenuActions" /> instance referencing this action map.
+        /// </summary>
+        public InputAdapterVRMenuActions @InputAdapterVRMenu => new InputAdapterVRMenuActions(this);
         /// <summary>
         /// Interface to implement callback methods for all input action callbacks associated with input actions defined by "InputAdapterPC" which allows adding and removing callbacks.
         /// </summary>
@@ -592,6 +763,28 @@ namespace Game.Scene.Editor.Block
             /// <seealso cref="UnityEngine.InputSystem.InputAction.performed" />
             /// <seealso cref="UnityEngine.InputSystem.InputAction.canceled" />
             void OnZoom(InputAction.CallbackContext context);
+        }
+        /// <summary>
+        /// Interface to implement callback methods for all input action callbacks associated with input actions defined by "InputAdapterVRMenu" which allows adding and removing callbacks.
+        /// </summary>
+        /// <seealso cref="InputAdapterVRMenuActions.AddCallbacks(IInputAdapterVRMenuActions)" />
+        /// <seealso cref="InputAdapterVRMenuActions.RemoveCallbacks(IInputAdapterVRMenuActions)" />
+        public interface IInputAdapterVRMenuActions
+        {
+            /// <summary>
+            /// Method invoked when associated input action "LeftHandClick" is either <see cref="UnityEngine.InputSystem.InputAction.started" />, <see cref="UnityEngine.InputSystem.InputAction.performed" /> or <see cref="UnityEngine.InputSystem.InputAction.canceled" />.
+            /// </summary>
+            /// <seealso cref="UnityEngine.InputSystem.InputAction.started" />
+            /// <seealso cref="UnityEngine.InputSystem.InputAction.performed" />
+            /// <seealso cref="UnityEngine.InputSystem.InputAction.canceled" />
+            void OnLeftHandClick(InputAction.CallbackContext context);
+            /// <summary>
+            /// Method invoked when associated input action "RightHandClick" is either <see cref="UnityEngine.InputSystem.InputAction.started" />, <see cref="UnityEngine.InputSystem.InputAction.performed" /> or <see cref="UnityEngine.InputSystem.InputAction.canceled" />.
+            /// </summary>
+            /// <seealso cref="UnityEngine.InputSystem.InputAction.started" />
+            /// <seealso cref="UnityEngine.InputSystem.InputAction.performed" />
+            /// <seealso cref="UnityEngine.InputSystem.InputAction.canceled" />
+            void OnRightHandClick(InputAction.CallbackContext context);
         }
     }
 }

@@ -7,6 +7,7 @@ using UnityEngine;
 using Sirenix.OdinInspector;
 using System;
 using Zenject;
+using Game.Tools.VR;
 
 namespace Game.Services.Managers
 {
@@ -19,6 +20,9 @@ namespace Game.Services.Managers
         [Required]
         [SerializeField] Transform _windowsParentTransform;
         [SerializeField] MenuWindowBase _windowSelected;
+
+        [Header("Canvas")]
+        [Required][SerializeField] CanvasControllerVR _canvasControllerVR;
 
         [Header("Windows Prefabs")]
         [Required][SerializeField] MenuWindowMain _windowMainMenu;
@@ -39,6 +43,8 @@ namespace Game.Services.Managers
         private TestResult _testResult = new TestResult(nameof(MenuWindowsManager));
         public float TestCoefficientReady => _testCoefficientReady;
         public string TestingSystemMessage => _testingSystemMessage;
+
+        public CanvasControllerVR CanvasControllerVR => _canvasControllerVR;
 
         public TestResult TestIt()
         {

@@ -9,6 +9,7 @@ namespace Game.Services
     {
         private const string ERROR_RUNTIME_MODE = "Critical error, wrong runtime mode";
 
+        private bool _isInitialized = false;
         private RuntimeMode _runtimeMode;
 
         private float _testCoefficientReady = 0.0f;
@@ -21,6 +22,7 @@ namespace Game.Services
         public string TestingSystemMessage => _testingSystemMessage;
 
         public RuntimeMode runtimeMode => _runtimeMode;
+        public bool isInitialized => _isInitialized;
 
         private IOpenXRService _openXRService;
 
@@ -36,6 +38,7 @@ namespace Game.Services
             else 
             {
                 _testCoefficientReady = 1.0f;
+                _isInitialized = true;
             }
 
                 return _testResult;

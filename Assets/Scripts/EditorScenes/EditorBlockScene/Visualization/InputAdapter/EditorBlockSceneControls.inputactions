@@ -139,6 +139,65 @@
                     "isPartOfComposite": false
                 }
             ]
+        },
+        {
+            "name": "InputAdapterVRMenu",
+            "id": "7d327157-c803-4933-9b57-7e5cfcae9814",
+            "actions": [
+                {
+                    "name": "LeftHandClick",
+                    "type": "Button",
+                    "id": "398a234a-a0f9-4d41-b026-7a152b64b889",
+                    "expectedControlType": "",
+                    "processors": "",
+                    "interactions": "",
+                    "initialStateCheck": false
+                },
+                {
+                    "name": "RightHandClick",
+                    "type": "Button",
+                    "id": "c9042930-c64c-404f-8ddb-1f9e031ea0b3",
+                    "expectedControlType": "",
+                    "processors": "",
+                    "interactions": "",
+                    "initialStateCheck": false
+                }
+            ],
+            "bindings": [
+                {
+                    "name": "",
+                    "id": "c4695866-462d-4f73-a914-55fde4bf69a0",
+                    "path": "<XRController>{LeftHand}/{TriggerButton}",
+                    "interactions": "",
+                    "processors": "",
+                    "groups": "",
+                    "action": "LeftHandClick",
+                    "isComposite": false,
+                    "isPartOfComposite": false
+                },
+                {
+                    "name": "",
+                    "id": "c8938c2e-855a-4d1c-b51f-ff4fe327a279",
+                    "path": "<Mouse>/leftButton",
+                    "interactions": "",
+                    "processors": "",
+                    "groups": "",
+                    "action": "LeftHandClick",
+                    "isComposite": false,
+                    "isPartOfComposite": false
+                },
+                {
+                    "name": "",
+                    "id": "c596729e-46ab-4f77-8843-f26efec0d3b9",
+                    "path": "<XRController>{RightHand}/{TriggerButton}",
+                    "interactions": "",
+                    "processors": "",
+                    "groups": "",
+                    "action": "RightHandClick",
+                    "isComposite": false,
+                    "isPartOfComposite": false
+                }
+            ]
         }
     ],
     "controlSchemes": []
